@@ -1,6 +1,7 @@
 module TheMall
   class ShoppingCart
-    
+    attr_reader :items
+
     def initialize
       @items = []
     end

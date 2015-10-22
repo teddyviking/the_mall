@@ -11,12 +11,12 @@ module TheMall
       items.each {|item| @stock << item}
     end
 
-    def recieve_new_visit
+    def receive_new_visit
       @shopping_cart = ShoppingCart.new
       puts "Welcome to #{@name}"
       display_stock
       ask_wanna_buy
-      @shopping_cart.checkout
+      proceed_to_checkout
     end
 
     def display_stock
@@ -52,6 +52,13 @@ module TheMall
       puts "Do you want to proceed to checkout? Y/N"
       user_input = gets.chomp
       user_input == "Y" ? true : false
+    end
+
+    def proceed_to_checkout
+      @shopping_cart.checkout
+      @shopping_cart.items.each do |item|
+        @stock.delete_at(@stock.index(item) || @stock.length)      
+      end
     end
 
   end
