@@ -11,6 +11,14 @@ module TheMall
       @price
     end
 
+    def set_selling_price(selling_price)
+      @price = selling_price
+    end
+
+    def genre
+      @name.downcase.to_sym
+    end
+
   end
   class Houseware < Item
 

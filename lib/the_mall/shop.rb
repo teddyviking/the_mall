@@ -2,26 +2,35 @@ module TheMall
 
   class Shop
 
-    def initialize(name)
+    def initialize(name, initial_budget, warehouse, cart_class)
       @name = name
+      @budget = initial_budget
+      @warehouse = warehouse
+      @cart_class = cart_class
       @stock = []
     end
 
     def add_items_to_stock(items)
-      items.each {|item| @stock << item}
+        items.each {|item| @stock << item}
     end
 
     def receive_new_visit
-      @shopping_cart = ShoppingCart.new
+      @shopping_cart = @cart_class.new
       puts "Welcome to #{@name}"
       display_stock
       ask_wanna_buy
       proceed_to_checkout
+      binding.pry
     end
 
     def display_stock
       puts "Today you can find the following products:"
-      @stock.each{|item| puts "#{item.name}: #{item.price}€"}
+      phrases = @stock.map{|item| "#{item.name}: #{item.price}€"}
+      phrases.uniq.each{|phrase| puts phrase}
+    end
+
+    def get_quantity_of_item(item)
+      @stock.count {|stock_item| stock_item.genre == item.genre }
     end
 
     private
@@ -56,9 +65,30 @@ module TheMall
 
     def proceed_to_checkout
       @shopping_cart.checkout
+      update_stock_after_checkout
+      destroy_shopping_cart
+    end
+
+    def update_stock_after_checkout
       @shopping_cart.items.each do |item|
-        @stock.delete_at(@stock.index(item) || @stock.length)      
+        stock_item = @stock.find {|stock_item| stock_item.genre == item.genre}
+        @stock.delete_at(@stock.index(stock_item)) if stock_item
+        order_item(item) if low_item_stock?(item)      
       end
+    end
+
+    def destroy_shopping_cart
+      @shopping_cart = nil
+    end
+
+    def low_item_stock?(item)
+      item_stock = get_quantity_of_item(item)
+      item_stock > 0 ? false : true
+    end
+
+    def order_item(item)
+      receipt = @warehouse.process_order(item.genre, self)
+      @budget -= receipt
     end
 
   end
